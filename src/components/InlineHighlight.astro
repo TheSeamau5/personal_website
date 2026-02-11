@@ -1,0 +1,10 @@
+---
+interface Props {
+  tone?: "blue" | "neutral";
+}
+
+const { tone = "blue" } = Astro.props;
+const content = (await Astro.slots.render("default")).trim();
+---
+
+<span class:list={["article-inline-highlight", tone === "neutral" && "is-neutral"]} set:html={content} />

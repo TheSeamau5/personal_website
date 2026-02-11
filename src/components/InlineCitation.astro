@@ -1,0 +1,12 @@
+---
+interface Props {
+  refId: string;
+  citeId?: string;
+  note?: string | number;
+}
+
+const { refId, citeId, note } = Astro.props;
+const content = (await Astro.slots.render("default")).trim();
+---
+
+<span class="article-inline-citation-wrap"><a href={`#${refId}`} id={citeId} class="article-inline-citation"><span class="article-inline-citation-text" set:html={content} /></a>{note !== undefined && <sup class="article-inline-citation-marker"><a href={`#${refId}`} class="article-inline-citation-marker-link" aria-label={`Reference ${note}`}>{note}</a></sup>}</span>

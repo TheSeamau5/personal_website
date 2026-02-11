@@ -105,44 +105,50 @@ function formatCompactNumber(value: number) {
 
 type FlipPanelProps = {
   showTable: boolean;
-  heightClass: string;
-  chart: ReactNode;
-  table: ReactNode;
+  front: ReactNode;
+  back: ReactNode;
 };
 
-function FlipPanel({ showTable, heightClass, chart, table }: FlipPanelProps) {
+function FlipPanel({ showTable, front, back }: FlipPanelProps) {
+  const faceStyle = {
+    WebkitBackfaceVisibility: "hidden" as const,
+    backfaceVisibility: "hidden" as const,
+  };
+
   return (
-    <div className={cn("relative w-full perspective-[1400px]", heightClass)}>
-      <div
-        className={cn(
-          "relative h-full w-full transform-3d transition-transform duration-500 will-change-transform",
-          showTable ? "rotate-y-180" : "",
-        )}
-      >
+    <div className="relative w-full" style={{ perspective: "1400px" }}>
+      <div className="relative grid w-full [grid-template-columns:minmax(0,1fr)]">
         <div
           className={cn(
-            "absolute inset-0 min-h-0 backface-hidden",
+            "col-start-1 row-start-1 min-h-0 w-full overflow-hidden border border-black bg-white py-3 transition-[transform,opacity] duration-500 will-change-transform sm:py-4",
             showTable ? "pointer-events-none" : "pointer-events-auto",
           )}
+          style={{
+            ...faceStyle,
+            WebkitTransformStyle: "preserve-3d",
+            transformStyle: "preserve-3d",
+            transform: showTable ? "rotateY(180deg)" : "rotateY(0deg)",
+            opacity: showTable ? 0 : 1,
+            zIndex: showTable ? 0 : 2,
+          }}
         >
-          {chart}
+          {front}
         </div>
         <div
           className={cn(
-            "absolute inset-0 min-h-0 overflow-hidden bg-white backface-hidden rotate-y-180",
+            "col-start-1 row-start-1 min-h-0 w-full overflow-hidden border border-black bg-white py-3 transition-[transform,opacity] duration-500 will-change-transform sm:py-4",
             showTable ? "pointer-events-auto" : "pointer-events-none",
           )}
+          style={{
+            ...faceStyle,
+            WebkitTransformStyle: "preserve-3d",
+            transformStyle: "preserve-3d",
+            transform: showTable ? "rotateY(0deg)" : "rotateY(-180deg)",
+            opacity: showTable ? 1 : 0,
+            zIndex: showTable ? 2 : 0,
+          }}
         >
-          <div
-            className={cn(
-              "h-full pr-1",
-              showTable
-                ? "overflow-auto overscroll-contain"
-                : "overflow-hidden",
-            )}
-          >
-            {table}
-          </div>
+          {back}
         </div>
       </div>
     </div>
@@ -165,449 +171,599 @@ export function EngagementChartStack() {
 
   return (
     <div className="not-prose mt-10 grid gap-6 sm:mt-12 sm:gap-8">
-      <Card className="group relative w-full overflow-hidden rounded-none border-black py-3 shadow-none sm:py-4">
-        <button
-          type="button"
-          aria-pressed={showEngagementTable}
-          aria-label={showEngagementTable ? "Show chart" : "Show table"}
-          onClick={() => setShowEngagementTable((current) => !current)}
-          className={tableToggleButtonClass}
-        >
-          {showEngagementTable ? "Chart" : "Table"}
-        </button>
-        <CardHeader className="px-3 sm:px-5">
-          <CardTitle className={chartCardTitleClass}>
-            Engagement Trend (Mock)
-          </CardTitle>
-          <CardDescription className={chartCardSubtitleClass}>
-            Weekly growth over nine weeks.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="px-3 sm:px-5">
-          <FlipPanel
-            showTable={showEngagementTable}
-            heightClass="h-68 sm:h-80"
-            chart={
-              <div className="flex h-full w-full items-center justify-center">
-                <ChartContainer
-                  config={engagementChartConfig}
-                  className="aspect-auto h-full w-full max-w-full"
-                >
-                  <LineChart
-                    accessibilityLayer
-                    data={engagementData}
-                    margin={{ left: 6, right: 6, top: 6, bottom: 6 }}
-                  >
-                    <CartesianGrid vertical={false} />
-                    <XAxis
-                      dataKey="week"
-                      tickLine={false}
-                      axisLine={false}
-                      tickMargin={8}
-                      tickFormatter={(value: string) =>
-                        value.replace("Week ", "W")
-                      }
-                      interval="preserveStartEnd"
-                      minTickGap={16}
-                      tick={{ fontSize: 14, fill: "var(--foreground)" }}
-                    />
-                    <YAxis
-                      tickLine={false}
-                      axisLine={false}
-                      tickMargin={8}
-                      width={48}
-                      tickFormatter={(value: number) =>
-                        formatCompactNumber(value)
-                      }
-                      tick={{ fontSize: 14, fill: "var(--foreground)" }}
-                    />
-                    <ChartTooltip
-                      cursor={false}
-                      content={
-                        <ChartTooltipContent
-                          className={chartTooltipClass}
-                          labelClassName="text-base font-semibold"
-                          formatter={(value) =>
-                            formatCompactNumber(Number(value))
+      <Card className="group relative w-full border-0 bg-transparent p-0 shadow-none">
+        <FlipPanel
+          showTable={showEngagementTable}
+          front={
+            <>
+              <button
+                type="button"
+                aria-pressed={showEngagementTable}
+                aria-label="Show table"
+                onClick={() => setShowEngagementTable((current) => !current)}
+                className={tableToggleButtonClass}
+              >
+                Table
+              </button>
+              <CardHeader className="px-3 sm:px-5">
+                <CardTitle className={chartCardTitleClass}>
+                  Engagement Trend (Mock)
+                </CardTitle>
+                <CardDescription className={chartCardSubtitleClass}>
+                  Weekly growth over nine weeks.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="px-3 sm:px-5">
+                <div className="h-68 sm:h-80">
+                  <div className="flex h-full w-full items-center justify-center">
+                    <ChartContainer
+                      config={engagementChartConfig}
+                      className="aspect-auto h-full w-full max-w-full"
+                    >
+                      <LineChart
+                        accessibilityLayer
+                        data={engagementData}
+                        margin={{ left: 6, right: 6, top: 6, bottom: 6 }}
+                      >
+                        <CartesianGrid vertical={false} />
+                        <XAxis
+                          dataKey="week"
+                          tickLine={false}
+                          axisLine={false}
+                          tickMargin={8}
+                          tickFormatter={(value: string) =>
+                            value.replace("Week ", "W")
+                          }
+                          interval="preserveStartEnd"
+                          minTickGap={16}
+                          tick={{ fontSize: 14, fill: "var(--foreground)" }}
+                        />
+                        <YAxis
+                          tickLine={false}
+                          axisLine={false}
+                          tickMargin={8}
+                          width={48}
+                          tickFormatter={(value: number) =>
+                            formatCompactNumber(value)
+                          }
+                          tick={{ fontSize: 14, fill: "var(--foreground)" }}
+                        />
+                        <ChartTooltip
+                          cursor={false}
+                          content={
+                            <ChartTooltipContent
+                              className={chartTooltipClass}
+                              labelClassName="text-base font-semibold"
+                              formatter={(value) =>
+                                formatCompactNumber(Number(value))
+                              }
+                            />
                           }
                         />
-                      }
-                    />
-                    <Line
-                      type="monotone"
-                      dataKey="engagement"
-                      stroke="var(--color-engagement)"
-                      strokeWidth={3}
-                      dot={false}
-                      activeDot={{
-                        fill: "var(--color-engagement)",
-                        r: 7,
-                        stroke: "var(--foreground)",
-                        strokeWidth: 2,
-                      }}
-                    />
-                  </LineChart>
-                </ChartContainer>
-              </div>
-            }
-            table={
-              <Table className="text-base">
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="text-base font-semibold">
-                      Week
-                    </TableHead>
-                    <TableHead className="text-base font-semibold">
-                      Engagement
-                    </TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {engagementData.map((row) => (
-                    <TableRow key={row.week}>
-                      <TableCell>{row.week}</TableCell>
-                      <TableCell>{row.engagementLabel}</TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            }
-          />
-        </CardContent>
+                        <Line
+                          type="monotone"
+                          dataKey="engagement"
+                          stroke="var(--color-engagement)"
+                          strokeWidth={3}
+                          dot={false}
+                          activeDot={{
+                            fill: "var(--color-engagement)",
+                            r: 7,
+                            stroke: "var(--foreground)",
+                            strokeWidth: 2,
+                          }}
+                        />
+                      </LineChart>
+                    </ChartContainer>
+                  </div>
+                </div>
+              </CardContent>
+            </>
+          }
+          back={
+            <>
+              <button
+                type="button"
+                aria-pressed={showEngagementTable}
+                aria-label="Show chart"
+                onClick={() => setShowEngagementTable((current) => !current)}
+                className={tableToggleButtonClass}
+              >
+                Chart
+              </button>
+              <CardHeader className="px-3 sm:px-5">
+                <CardTitle className={chartCardTitleClass}>
+                  Engagement Trend (Mock)
+                </CardTitle>
+                <CardDescription className={chartCardSubtitleClass}>
+                  Weekly growth over nine weeks.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="px-3 sm:px-5">
+                <div className="h-68 overflow-hidden bg-white sm:h-80">
+                  <div className="h-full overflow-auto pr-1 overscroll-contain">
+                    <Table className="text-base">
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead className="text-base font-semibold">
+                            Week
+                          </TableHead>
+                          <TableHead className="text-base font-semibold">
+                            Engagement
+                          </TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {engagementData.map((row) => (
+                          <TableRow key={row.week}>
+                            <TableCell>{row.week}</TableCell>
+                            <TableCell>{row.engagementLabel}</TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
+                </div>
+              </CardContent>
+            </>
+          }
+        />
       </Card>
     </div>
   );
 }
 
 export function ThroughputTrafficStack() {
-  const [activeThroughputIndex, setActiveThroughputIndex] = useState<
-    number | null
-  >(null);
+  const [activeThroughputIndex, setActiveThroughputIndex] = useState<number>();
   const [showThroughputTable, setShowThroughputTable] = useState(false);
 
-  const [activeTrafficIndex, setActiveTrafficIndex] = useState<number | null>(
-    null,
-  );
+  const [activeTrafficIndex, setActiveTrafficIndex] = useState<number>();
   const [showTrafficTable, setShowTrafficTable] = useState(false);
 
   return (
     <div className="not-prose mt-10 grid gap-6 sm:mt-12 sm:gap-8">
-      <Card className="group relative w-full overflow-hidden rounded-none border-black py-3 shadow-none sm:py-4">
-        <button
-          type="button"
-          aria-pressed={showThroughputTable}
-          aria-label={showThroughputTable ? "Show chart" : "Show table"}
-          onClick={() => setShowThroughputTable((current) => !current)}
-          className={tableToggleButtonClass}
-        >
-          {showThroughputTable ? "Chart" : "Table"}
-        </button>
-        <CardHeader className="px-3 sm:px-5">
-          <CardTitle className={chartCardTitleClass}>
-            Weekly Throughput (Mock)
-          </CardTitle>
-          <CardDescription className={chartCardSubtitleClass}>
-            Bar view of output by weekday.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="px-3 sm:px-5">
-          <FlipPanel
-            showTable={showThroughputTable}
-            heightClass="h-68 sm:h-80"
-            chart={
-              <div className="flex h-full w-full items-center justify-center">
-                <ChartContainer
-                  config={throughputChartConfig}
-                  className="aspect-auto h-full w-full max-w-full"
-                >
-                  <BarChart
-                    accessibilityLayer
-                    data={throughputData}
-                    margin={{ left: 6, right: 6, top: 6, bottom: 6 }}
-                    onMouseMove={(state) => {
-                      if (typeof state?.activeTooltipIndex === "number") {
-                        setActiveThroughputIndex(state.activeTooltipIndex);
-                      }
-                    }}
-                    onMouseLeave={() => setActiveThroughputIndex(null)}
-                  >
-                    <CartesianGrid vertical={false} />
-                    <XAxis
-                      dataKey="day"
-                      tickLine={false}
-                      axisLine={false}
-                      tickMargin={8}
-                      minTickGap={16}
-                      tick={{ fontSize: 14, fill: "var(--foreground)" }}
-                    />
-                    <YAxis
-                      tickLine={false}
-                      axisLine={false}
-                      tickMargin={8}
-                      width={36}
-                      tick={{ fontSize: 14, fill: "var(--foreground)" }}
-                    />
-                    <ChartTooltip
-                      cursor={false}
-                      content={
-                        <ChartTooltipContent
-                          className={chartTooltipClass}
-                          labelClassName="text-base font-semibold"
-                        />
-                      }
-                    />
-                    <Bar dataKey="units" radius={0}>
-                      {throughputData.map((entry, index) => (
-                        <Cell
-                          key={entry.day}
-                          fill={
-                            activeThroughputIndex === index
-                              ? "var(--chart-1)"
-                              : "#6b7280"
+      <Card className="group relative w-full border-0 bg-transparent p-0 shadow-none">
+        <FlipPanel
+          showTable={showThroughputTable}
+          front={
+            <>
+              <button
+                type="button"
+                aria-pressed={showThroughputTable}
+                aria-label="Show table"
+                onClick={() => setShowThroughputTable((current) => !current)}
+                className={tableToggleButtonClass}
+              >
+                Table
+              </button>
+              <CardHeader className="px-3 sm:px-5">
+                <CardTitle className={chartCardTitleClass}>
+                  Weekly Throughput (Mock)
+                </CardTitle>
+                <CardDescription className={chartCardSubtitleClass}>
+                  Bar view of output by weekday.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="px-3 sm:px-5">
+                <div className="h-68 sm:h-80">
+                  <div className="flex h-full w-full items-center justify-center">
+                    <ChartContainer
+                      config={throughputChartConfig}
+                      className="aspect-auto h-full w-full max-w-full"
+                    >
+                      <BarChart
+                        accessibilityLayer
+                        data={throughputData}
+                        margin={{ left: 6, right: 6, top: 6, bottom: 6 }}
+                        onMouseMove={(state) => {
+                          if (typeof state?.activeTooltipIndex === "number") {
+                            setActiveThroughputIndex(state.activeTooltipIndex);
                           }
-                          stroke="#111"
-                          strokeWidth={
-                            activeThroughputIndex === index ? 1.5 : 1
+                        }}
+                        onMouseLeave={() => setActiveThroughputIndex(undefined)}
+                      >
+                        <CartesianGrid vertical={false} />
+                        <XAxis
+                          dataKey="day"
+                          tickLine={false}
+                          axisLine={false}
+                          tickMargin={8}
+                          minTickGap={16}
+                          tick={{ fontSize: 14, fill: "var(--foreground)" }}
+                        />
+                        <YAxis
+                          tickLine={false}
+                          axisLine={false}
+                          tickMargin={8}
+                          width={36}
+                          tick={{ fontSize: 14, fill: "var(--foreground)" }}
+                        />
+                        <ChartTooltip
+                          cursor={false}
+                          content={
+                            <ChartTooltipContent
+                              className={chartTooltipClass}
+                              labelClassName="text-base font-semibold"
+                            />
                           }
                         />
-                      ))}
-                    </Bar>
-                  </BarChart>
-                </ChartContainer>
-              </div>
-            }
-            table={
-              <Table className="text-base">
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="text-base font-semibold">
-                      Day
-                    </TableHead>
-                    <TableHead className="text-base font-semibold">
-                      Units
-                    </TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {throughputData.map((row) => (
-                    <TableRow key={row.day}>
-                      <TableCell>{row.day}</TableCell>
-                      <TableCell>{row.units}</TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            }
-          />
-        </CardContent>
+                        <Bar dataKey="units" radius={0}>
+                          {throughputData.map((entry, index) => (
+                            <Cell
+                              key={entry.day}
+                              fill={
+                                activeThroughputIndex === index
+                                  ? "var(--chart-1)"
+                                  : "#6b7280"
+                              }
+                              stroke="#111"
+                              strokeWidth={
+                                activeThroughputIndex === index ? 1.5 : 1
+                              }
+                            />
+                          ))}
+                        </Bar>
+                      </BarChart>
+                    </ChartContainer>
+                  </div>
+                </div>
+              </CardContent>
+            </>
+          }
+          back={
+            <>
+              <button
+                type="button"
+                aria-pressed={showThroughputTable}
+                aria-label="Show chart"
+                onClick={() => setShowThroughputTable((current) => !current)}
+                className={tableToggleButtonClass}
+              >
+                Chart
+              </button>
+              <CardHeader className="px-3 sm:px-5">
+                <CardTitle className={chartCardTitleClass}>
+                  Weekly Throughput (Mock)
+                </CardTitle>
+                <CardDescription className={chartCardSubtitleClass}>
+                  Bar view of output by weekday.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="px-3 sm:px-5">
+                <div className="h-68 overflow-hidden bg-white sm:h-80">
+                  <div className="h-full overflow-auto pr-1 overscroll-contain">
+                    <Table className="text-base">
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead className="text-base font-semibold">
+                            Day
+                          </TableHead>
+                          <TableHead className="text-base font-semibold">
+                            Units
+                          </TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {throughputData.map((row) => (
+                          <TableRow key={row.day}>
+                            <TableCell>{row.day}</TableCell>
+                            <TableCell>{row.units}</TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
+                </div>
+              </CardContent>
+            </>
+          }
+        />
       </Card>
 
-      <Card className="group relative w-full overflow-hidden rounded-none border-black py-3 shadow-none sm:py-4">
-        <button
-          type="button"
-          aria-pressed={showTrafficTable}
-          aria-label={showTrafficTable ? "Show chart" : "Show table"}
-          onClick={() => setShowTrafficTable((current) => !current)}
-          className={tableToggleButtonClass}
-        >
-          {showTrafficTable ? "Chart" : "Table"}
-        </button>
-        <CardHeader className="px-3 sm:px-5">
-          <CardTitle className={chartCardTitleClass}>
-            Traffic Mix (Mock)
-          </CardTitle>
-          <CardDescription className={chartCardSubtitleClass}>
-            Relative channel share.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="px-3 sm:px-5">
-          <FlipPanel
-            showTable={showTrafficTable}
-            heightClass="h-65 sm:h-75"
-            chart={
-              <div className="flex h-full w-full flex-col items-center justify-center gap-3">
-                <ChartContainer
-                  config={trafficChartConfig}
-                  className="aspect-square h-39 w-39 min-h-0 sm:h-45 sm:w-45"
-                >
-                  <PieChart accessibilityLayer>
-                    <ChartTooltip
-                      cursor={false}
-                      content={
-                        <ChartTooltipContent
-                          className={chartTooltipClass}
-                          labelClassName="text-base font-semibold"
-                          labelKey="key"
-                          nameKey="key"
-                          formatter={(value) => `${value}%`}
-                        />
-                      }
-                    />
-                    <Pie
-                      data={trafficData}
-                      dataKey="share"
-                      nameKey="key"
-                      activeIndex={activeTrafficIndex ?? undefined}
-                      activeShape={renderActivePieShape}
-                      innerRadius={36}
-                      outerRadius={72}
-                      stroke="#111"
-                      strokeWidth={1}
-                      onMouseEnter={(_, index) => setActiveTrafficIndex(index)}
-                      onMouseLeave={() => setActiveTrafficIndex(null)}
+      <Card className="group relative w-full border-0 bg-transparent p-0 shadow-none">
+        <FlipPanel
+          showTable={showTrafficTable}
+          front={
+            <>
+              <button
+                type="button"
+                aria-pressed={showTrafficTable}
+                aria-label="Show table"
+                onClick={() => setShowTrafficTable((current) => !current)}
+                className={tableToggleButtonClass}
+              >
+                Table
+              </button>
+              <CardHeader className="px-3 sm:px-5">
+                <CardTitle className={chartCardTitleClass}>
+                  Traffic Mix (Mock)
+                </CardTitle>
+                <CardDescription className={chartCardSubtitleClass}>
+                  Relative channel share.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="px-3 sm:px-5">
+                <div className="h-65 sm:h-75">
+                  <div className="flex h-full w-full flex-col items-center justify-center gap-3">
+                    <ChartContainer
+                      config={trafficChartConfig}
+                      className="aspect-square h-39 w-39 min-h-0 sm:h-45 sm:w-45"
                     >
-                      {trafficData.map((entry, index) => (
-                        <Cell
-                          key={entry.key}
-                          fill={
-                            index === activeTrafficIndex
-                              ? "var(--chart-1)"
-                              : entry.fill
+                      <PieChart accessibilityLayer>
+                        <ChartTooltip
+                          cursor={false}
+                          content={
+                            <ChartTooltipContent
+                              className={chartTooltipClass}
+                              labelClassName="text-base font-semibold"
+                              labelKey="key"
+                              nameKey="key"
+                              formatter={(value) => `${value}%`}
+                            />
                           }
-                          opacity={1}
+                        />
+                        <Pie
+                          data={trafficData}
+                          dataKey="share"
+                          nameKey="key"
+                          activeIndex={activeTrafficIndex ?? undefined}
+                          activeShape={renderActivePieShape}
+                          innerRadius={36}
+                          outerRadius={72}
                           stroke="#111"
                           strokeWidth={1}
-                        />
-                      ))}
-                    </Pie>
-                  </PieChart>
-                </ChartContainer>
+                          onMouseEnter={(_, index) =>
+                            setActiveTrafficIndex(index)
+                          }
+                          onMouseLeave={() => setActiveTrafficIndex(undefined)}
+                        >
+                          {trafficData.map((entry, index) => (
+                            <Cell
+                              key={entry.key}
+                              fill={
+                                index === activeTrafficIndex
+                                  ? "var(--chart-1)"
+                                  : entry.fill
+                              }
+                              opacity={1}
+                              stroke="#111"
+                              strokeWidth={1}
+                            />
+                          ))}
+                        </Pie>
+                      </PieChart>
+                    </ChartContainer>
 
-                <div className="flex flex-wrap justify-center gap-3">
-                  {trafficData.map((item, index) => {
-                    const isActive = index === activeTrafficIndex;
-                    return (
-                      <button
-                        key={item.key}
-                        type="button"
-                        aria-pressed={isActive}
-                        onClick={() => setActiveTrafficIndex(index)}
-                        onMouseEnter={() => setActiveTrafficIndex(index)}
-                        onFocus={() => setActiveTrafficIndex(index)}
-                        className={cn(
-                          "inline-flex items-center gap-2 border border-black px-3 py-2 text-base font-semibold transition",
-                          isActive
-                            ? "scale-105 bg-zinc-100 text-black"
-                            : "bg-white text-black hover:bg-zinc-100",
-                        )}
-                      >
-                        <span
-                          className="inline-block h-3.5 w-3.5 border border-black"
-                          style={{
-                            backgroundColor: isActive
-                              ? "var(--chart-1)"
-                              : item.fill,
-                          }}
-                          aria-hidden="true"
-                        />
-                        <span>{item.channel}</span>
-                        <span className="tabular-nums">{item.share}%</span>
-                      </button>
-                    );
-                  })}
+                    <div className="flex flex-wrap justify-center gap-3">
+                      {trafficData.map((item, index) => {
+                        const isActive = index === activeTrafficIndex;
+                        return (
+                          <button
+                            key={item.key}
+                            type="button"
+                            aria-pressed={isActive}
+                            onClick={() => setActiveTrafficIndex(index)}
+                            onMouseEnter={() => setActiveTrafficIndex(index)}
+                            onFocus={() => setActiveTrafficIndex(index)}
+                            className={cn(
+                              "inline-flex items-center gap-2 border border-black px-3 py-2 text-base font-semibold transition",
+                              isActive
+                                ? "scale-105 bg-zinc-100 text-black"
+                                : "bg-white text-black hover:bg-zinc-100",
+                            )}
+                          >
+                            <span
+                              className="inline-block h-3.5 w-3.5 border border-black"
+                              style={{
+                                backgroundColor: isActive
+                                  ? "var(--chart-1)"
+                                  : item.fill,
+                              }}
+                              aria-hidden="true"
+                            />
+                            <span>{item.channel}</span>
+                            <span className="tabular-nums">{item.share}%</span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
                 </div>
-              </div>
-            }
-            table={
-              <Table className="text-base">
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="text-base font-semibold">
-                      Channel
-                    </TableHead>
-                    <TableHead className="text-base font-semibold">
-                      Share
-                    </TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {trafficData.map((row) => (
-                    <TableRow key={row.key}>
-                      <TableCell>{row.channel}</TableCell>
-                      <TableCell>{row.share}%</TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            }
-          />
-        </CardContent>
+              </CardContent>
+            </>
+          }
+          back={
+            <>
+              <button
+                type="button"
+                aria-pressed={showTrafficTable}
+                aria-label="Show chart"
+                onClick={() => setShowTrafficTable((current) => !current)}
+                className={tableToggleButtonClass}
+              >
+                Chart
+              </button>
+              <CardHeader className="px-3 sm:px-5">
+                <CardTitle className={chartCardTitleClass}>
+                  Traffic Mix (Mock)
+                </CardTitle>
+                <CardDescription className={chartCardSubtitleClass}>
+                  Relative channel share.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="px-3 sm:px-5">
+                <div className="h-65 overflow-hidden bg-white sm:h-75">
+                  <div className="h-full overflow-auto pr-1 overscroll-contain">
+                    <Table className="text-base">
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead className="text-base font-semibold">
+                            Channel
+                          </TableHead>
+                          <TableHead className="text-base font-semibold">
+                            Share
+                          </TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {trafficData.map((row) => (
+                          <TableRow key={row.key}>
+                            <TableCell>{row.channel}</TableCell>
+                            <TableCell>{row.share}%</TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
+                </div>
+              </CardContent>
+            </>
+          }
+        />
       </Card>
     </div>
   );
 }
 
 export function ThroughputSnapshotCard() {
-  const [activeIndex, setActiveIndex] = useState<number | null>(null);
+  const [activeIndex, setActiveIndex] = useState<number>();
+  const [showThroughputTable, setShowThroughputTable] = useState(false);
 
   return (
     <div className="not-prose">
-      <Card className="relative h-full w-full overflow-hidden rounded-none border-black py-3 shadow-none sm:py-4">
-        <CardHeader className="px-3 sm:px-4">
-          <CardTitle className={chartCardTitleClass}>
-            Throughput Snapshot
-          </CardTitle>
-          <CardDescription className={chartCardSubtitleClass}>
-            Fast daily output check.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="px-3 sm:px-4">
-          <div className="h-68 w-full sm:h-80">
-            <ChartContainer
-              config={throughputChartConfig}
-              className="aspect-auto h-full w-full max-w-full"
-            >
-              <BarChart
-                accessibilityLayer
-                data={throughputData}
-                margin={{ left: 6, right: 6, top: 6, bottom: 6 }}
-                onMouseMove={(state) => {
-                  if (typeof state?.activeTooltipIndex === "number") {
-                    setActiveIndex(state.activeTooltipIndex);
-                  }
-                }}
-                onMouseLeave={() => setActiveIndex(null)}
+      <Card className="group relative h-full w-full border-0 bg-transparent p-0 shadow-none">
+        <FlipPanel
+          showTable={showThroughputTable}
+          front={
+            <>
+              <button
+                type="button"
+                aria-pressed={showThroughputTable}
+                aria-label="Show table"
+                onClick={() => setShowThroughputTable((current) => !current)}
+                className={tableToggleButtonClass}
               >
-                <CartesianGrid vertical={false} />
-                <XAxis
-                  dataKey="day"
-                  tickLine={false}
-                  axisLine={false}
-                  tickMargin={8}
-                  tick={{ fontSize: 14, fill: "var(--foreground)" }}
-                />
-                <YAxis
-                  tickLine={false}
-                  axisLine={false}
-                  tickMargin={8}
-                  width={36}
-                  tick={{ fontSize: 14, fill: "var(--foreground)" }}
-                />
-                <ChartTooltip
-                  cursor={false}
-                  content={
-                    <ChartTooltipContent
-                      className={chartTooltipClass}
-                      labelClassName="text-base font-semibold"
-                    />
-                  }
-                />
-                <Bar dataKey="units" radius={0}>
-                  {throughputData.map((entry, index) => (
-                    <Cell
-                      key={entry.day}
-                      fill={
-                        activeIndex === index ? "var(--chart-1)" : "#6b7280"
-                      }
-                      stroke="#111"
-                      strokeWidth={activeIndex === index ? 1.5 : 1}
-                    />
-                  ))}
-                </Bar>
-              </BarChart>
-            </ChartContainer>
-          </div>
-        </CardContent>
+                Table
+              </button>
+              <CardHeader className="px-3 sm:px-4">
+                <CardTitle className={chartCardTitleClass}>
+                  Throughput Snapshot
+                </CardTitle>
+                <CardDescription className={chartCardSubtitleClass}>
+                  Fast daily output check.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="px-3 sm:px-4">
+                <div className="h-68 sm:h-80">
+                  <div className="h-full w-full">
+                    <ChartContainer
+                      config={throughputChartConfig}
+                      className="aspect-auto h-full w-full max-w-full"
+                    >
+                      <BarChart
+                        accessibilityLayer
+                        data={throughputData}
+                        margin={{ left: 6, right: 6, top: 6, bottom: 6 }}
+                        onMouseMove={(state) => {
+                          if (typeof state?.activeTooltipIndex === "number") {
+                            setActiveIndex(state.activeTooltipIndex);
+                          }
+                        }}
+                        onMouseLeave={() => setActiveIndex(undefined)}
+                      >
+                        <CartesianGrid vertical={false} />
+                        <XAxis
+                          dataKey="day"
+                          tickLine={false}
+                          axisLine={false}
+                          tickMargin={8}
+                          tick={{ fontSize: 14, fill: "var(--foreground)" }}
+                        />
+                        <YAxis
+                          tickLine={false}
+                          axisLine={false}
+                          tickMargin={8}
+                          width={36}
+                          tick={{ fontSize: 14, fill: "var(--foreground)" }}
+                        />
+                        <ChartTooltip
+                          cursor={false}
+                          content={
+                            <ChartTooltipContent
+                              className={chartTooltipClass}
+                              labelClassName="text-base font-semibold"
+                            />
+                          }
+                        />
+                        <Bar dataKey="units" radius={0}>
+                          {throughputData.map((entry, index) => (
+                            <Cell
+                              key={entry.day}
+                              fill={
+                                activeIndex === index
+                                  ? "var(--chart-1)"
+                                  : "#6b7280"
+                              }
+                              stroke="#111"
+                              strokeWidth={activeIndex === index ? 1.5 : 1}
+                            />
+                          ))}
+                        </Bar>
+                      </BarChart>
+                    </ChartContainer>
+                  </div>
+                </div>
+              </CardContent>
+            </>
+          }
+          back={
+            <>
+              <button
+                type="button"
+                aria-pressed={showThroughputTable}
+                aria-label="Show chart"
+                onClick={() => setShowThroughputTable((current) => !current)}
+                className={tableToggleButtonClass}
+              >
+                Chart
+              </button>
+              <CardHeader className="px-3 sm:px-4">
+                <CardTitle className={chartCardTitleClass}>
+                  Throughput Snapshot
+                </CardTitle>
+                <CardDescription className={chartCardSubtitleClass}>
+                  Fast daily output check.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="px-3 sm:px-4">
+                <div className="h-68 overflow-hidden bg-white sm:h-80">
+                  <div className="h-full overflow-auto pr-1 overscroll-contain">
+                    <Table className="text-base">
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead className="text-base font-semibold">
+                            Day
+                          </TableHead>
+                          <TableHead className="text-base font-semibold">
+                            Units
+                          </TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {throughputData.map((row) => (
+                          <TableRow key={row.day}>
+                            <TableCell>{row.day}</TableCell>
+                            <TableCell>{row.units}</TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
+                </div>
+              </CardContent>
+            </>
+          }
+        />
       </Card>
     </div>
   );

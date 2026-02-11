@@ -1,0 +1,14 @@
+---
+interface Props {
+  title: string;
+}
+
+const { title } = Astro.props;
+---
+
+<aside class="article-highlight" aria-label={title}>
+  <p class="article-highlight-title">{title}</p>
+  <div class="article-highlight-body">
+    <slot />
+  </div>
+</aside>

@@ -73,8 +73,6 @@ body {
 
 html {
   background: var(--background);
-  scrollbar-width: thin;
-  scrollbar-color: var(--scrollbar-thumb-gray) transparent;
 }
 
 body {
@@ -83,26 +81,94 @@ body {
   color: var(--foreground);
 }
 
+::selection {
+  background: #1d4ed8;
+  color: #fff;
+}
+
+::-moz-selection {
+  background: #1d4ed8;
+  color: #fff;
+}
+
 @supports selector(::-webkit-scrollbar) {
-  *::-webkit-scrollbar {
-    width: var(--scrollbar-size);
-    height: var(--scrollbar-size);
+  :root,
+  html,
+  body,
+  * {
+    scrollbar-width: auto;
+    scrollbar-color: auto;
   }
+}
 
-  *::-webkit-scrollbar-track {
-    background: transparent;
-  }
+:root::-webkit-scrollbar,
+html::-webkit-scrollbar,
+body::-webkit-scrollbar,
+*::-webkit-scrollbar {
+  -webkit-appearance: none;
+  appearance: none;
+  width: var(--scrollbar-size);
+  height: var(--scrollbar-size);
+  border-radius: 0 !important;
+  -webkit-border-radius: 0 !important;
+}
 
-  *::-webkit-scrollbar-thumb {
-    background-color: var(--scrollbar-thumb-gray);
-    border: 2px solid transparent;
-    background-clip: content-box;
-    border-radius: 0;
-  }
+:root::-webkit-scrollbar-track,
+html::-webkit-scrollbar-track,
+body::-webkit-scrollbar-track,
+*::-webkit-scrollbar-track {
+  background: transparent;
+  border-radius: 0 !important;
+  -webkit-border-radius: 0 !important;
+}
 
-  *::-webkit-scrollbar-thumb:hover {
-    background-color: var(--scrollbar-thumb-gray-hover);
-  }
+:root::-webkit-scrollbar-track-piece,
+html::-webkit-scrollbar-track-piece,
+body::-webkit-scrollbar-track-piece,
+*::-webkit-scrollbar-track-piece {
+  border-radius: 0 !important;
+  -webkit-border-radius: 0 !important;
+}
+
+:root::-webkit-scrollbar-corner,
+html::-webkit-scrollbar-corner,
+body::-webkit-scrollbar-corner,
+*::-webkit-scrollbar-corner,
+:root::-webkit-resizer,
+html::-webkit-resizer,
+body::-webkit-resizer,
+*::-webkit-resizer {
+  border-radius: 0 !important;
+  -webkit-border-radius: 0 !important;
+}
+
+:root::-webkit-scrollbar-thumb,
+html::-webkit-scrollbar-thumb,
+body::-webkit-scrollbar-thumb,
+*::-webkit-scrollbar-thumb,
+*::-webkit-scrollbar-thumb:horizontal,
+*::-webkit-scrollbar-thumb:vertical {
+  -webkit-appearance: none;
+  appearance: none;
+  background-color: var(--scrollbar-thumb-gray);
+  border: 0;
+  background-clip: border-box;
+  border-radius: 0 !important;
+  -webkit-border-radius: 0 !important;
+}
+
+:root::-webkit-scrollbar-thumb:hover,
+:root::-webkit-scrollbar-thumb:active,
+html::-webkit-scrollbar-thumb:hover,
+html::-webkit-scrollbar-thumb:active,
+body::-webkit-scrollbar-thumb:hover,
+body::-webkit-scrollbar-thumb:active,
+*::-webkit-scrollbar-thumb:hover,
+*::-webkit-scrollbar-thumb:active {
+  background-color: var(--scrollbar-thumb-gray-hover);
+  background-clip: border-box;
+  border-radius: 0 !important;
+  -webkit-border-radius: 0 !important;
 }
 
 .article-content {
@@ -154,10 +220,209 @@ body {
   margin-bottom: 0.45em;
 }
 
+.article-content :where(ul, ol):not(.article-references-list) {
+  margin-top: 1em;
+  margin-bottom: 1.25em;
+  padding-left: 1.45em;
+  font-size: clamp(1.28rem, 1.08rem + 0.62vw, 1.6rem);
+  line-height: 1.72;
+}
+
+.article-content ul:not(.article-references-list) {
+  list-style-type: square;
+}
+
+.article-content ol:not(.article-references-list) {
+  list-style-type: decimal;
+}
+
+.article-content :where(ul, ol):not(.article-references-list) > li {
+  margin-top: 0.38em;
+}
+
+.article-content :where(ul, ol):not(.article-references-list) > li:first-child {
+  margin-top: 0;
+}
+
+.article-content :where(ul, ol):not(.article-references-list) li::marker {
+  color: #1d4ed8;
+  font-weight: 700;
+}
+
+.article-content :where(ul, ol):not(.article-references-list) :where(ul, ol) {
+  margin-top: 0.52em;
+  margin-bottom: 0.22em;
+  padding-left: 1.35em;
+  font-size: 0.93em;
+  line-height: 1.65;
+}
+
+.article-content ul:not(.article-references-list) ul {
+  list-style-type: circle;
+}
+
+.article-content ol:not(.article-references-list) ol {
+  list-style-type: lower-alpha;
+}
+
+.article-content ol:not(.article-references-list) ol ol {
+  list-style-type: lower-roman;
+}
+
 .article-content a {
   color: #1d4ed8;
   text-decoration-thickness: 1.5px;
   text-underline-offset: 3px;
+}
+
+.article-content .article-citation-link {
+  margin-left: 0.14em;
+  font-size: 0.72em;
+  line-height: 1;
+  font-weight: 700;
+  white-space: nowrap;
+  text-decoration: none;
+}
+
+.article-content .article-citation-link:hover,
+.article-content .article-citation-link:focus-visible {
+  text-decoration: underline;
+}
+
+.article-content .article-references {
+  margin-top: 3rem;
+  border-top: 1px solid #18181b;
+  border-bottom: 1px solid #18181b;
+  padding-top: 1.2rem;
+  padding-bottom: 1.2rem;
+}
+
+.article-content .article-references h2 {
+  margin: 0 0 0.7rem;
+}
+
+.article-content .article-references-list {
+  margin: 0;
+  padding-left: 1.45rem;
+}
+
+.article-content .article-references-list li {
+  margin: 0;
+  padding: 0.65rem 0;
+  font-size: clamp(1.03rem, 0.95rem + 0.28vw, 1.22rem);
+  line-height: 1.5;
+}
+
+.article-content .article-references-list li + li {
+  border-top: 1px solid #d4d4d8;
+}
+
+.article-content .article-references-list li a {
+  margin-left: 0.4rem;
+}
+
+.article-content .article-citation-backlink {
+  font-size: 0.95em;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.article-content .article-highlight {
+  margin-top: 1.4em;
+  margin-bottom: 1.4em;
+  border: 1px solid #18181b;
+  background: #eff6ff;
+  padding: 1rem 1.05rem;
+}
+
+.article-content .article-highlight-title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: clamp(1.12rem, 1rem + 0.34vw, 1.34rem);
+  line-height: 1.25;
+  color: #1e3a8a;
+}
+
+.article-content .article-highlight-body {
+  margin-top: 0.5rem;
+}
+
+.article-content .article-highlight-body p {
+  margin-top: 0.7em;
+  font-size: clamp(1.08rem, 1rem + 0.3vw, 1.3rem);
+  line-height: 1.64;
+}
+
+.article-content .article-highlight-body p:first-child {
+  margin-top: 0;
+}
+
+.article-content .article-inline-highlight {
+  display: inline;
+  font-family: inherit;
+  font-size: 1em;
+  font-weight: inherit;
+  line-height: inherit;
+  letter-spacing: inherit;
+  vertical-align: baseline;
+  border: 1px solid #2563eb;
+  border-bottom-width: 4px;
+  background: #dbeafe;
+  color: #1e40af;
+  padding: 0 0.16em;
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+}
+
+.article-content .article-inline-highlight.is-neutral {
+  border-color: #52525b;
+  background: #e4e4e7;
+  color: #18181b;
+}
+
+.article-content .article-inline-citation-wrap {
+  display: inline;
+}
+
+.article-content .article-inline-citation {
+  display: inline;
+  color: #1d4ed8;
+  text-decoration-line: underline;
+  text-decoration-color: #1d4ed8;
+  text-decoration-thickness: 1.5px;
+  text-underline-offset: 3px;
+  font-weight: 600;
+}
+
+.article-content .article-inline-citation-text {
+  display: inline;
+}
+
+.article-content .article-inline-citation-marker {
+  margin-left: 0.1em;
+  font-size: 0.62em;
+  line-height: 0;
+  vertical-align: super;
+  color: #1d4ed8;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  text-decoration: none;
+}
+
+.article-content .article-inline-citation-marker-link {
+  color: inherit;
+  text-decoration: none;
+}
+
+.article-content .article-inline-citation:hover,
+.article-content .article-inline-citation:focus-visible {
+  color: #1e40af;
+  text-decoration-color: #1e40af;
+}
+
+.article-content .article-inline-citation-wrap:hover .article-inline-citation-marker,
+.article-content .article-inline-citation-wrap:focus-within .article-inline-citation-marker {
+  color: #1d4ed8;
 }
 
 .article-content pre,
@@ -173,8 +438,19 @@ body {
   padding: 1rem;
   max-height: min(70vh, 42rem);
   overflow: auto;
-  scrollbar-width: thin;
-  scrollbar-color: var(--scrollbar-thumb-gray) transparent;
+}
+
+@supports (-moz-appearance: none) {
+  html {
+    scrollbar-width: thin;
+    scrollbar-color: var(--scrollbar-thumb-gray) transparent;
+  }
+
+  .article-content pre,
+  .article-content pre.astro-code {
+    scrollbar-width: thin;
+    scrollbar-color: var(--scrollbar-thumb-gray) transparent;
+  }
 }
 
 .article-content .code-block-title {
@@ -300,17 +576,6 @@ body {
 
 .article-content .code-copy-button.is-copied .icon-check {
   display: inline-flex;
-}
-
-.article-content img.inline-image {
-  display: inline-block;
-  width: 2.4em;
-  height: 2.4em;
-  vertical-align: -0.6em;
-  border: 1px solid #d4d4d8;
-  border-radius: 0;
-  margin-inline: 0.18em;
-  background: #fff;
 }
 
 .article-content .article-image-block {

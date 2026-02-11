@@ -1,19 +1,67 @@
 ---
 title: Lorem Ipsum Stress Test
 pubDate: 2026-02-11
-description: Long-form visual stress test with dense prose, code blocks, inline images, and monochrome blue-accent charts.
+description: Long-form visual stress test with dense prose, code blocks, wide image blocks, and monochrome blue-accent charts.
 ---
 
 import SplitGrid from "@/components/SplitGrid.astro"
+import ArticleHighlight from "@/components/ArticleHighlight.astro"
+import InlineHighlight from "@/components/InlineHighlight.astro"
+import InlineCitation from "@/components/InlineCitation.astro"
 import {
   EngagementChartStack,
   ThroughputSnapshotCard,
   ThroughputTrafficStack,
 } from "@/components/post-chart-blocks"
 
-Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vestibulum id nibh sed enim viverra porta, nec dignissim lorem luctus. Integer <img src="/images/inline-grid.svg" alt="grid thumbnail" class="inline-image" /> scelerisque nunc sed arcu facilisis, quis ullamcorper arcu suscipit. Curabitur dictum, massa sit amet tempor ullamcorper, lacus risus volutpat mauris, nec varius odio nibh et turpis.
+Lorem ipsum dolor sit amet, <InlineCitation refId="ref-1" citeId="cite-1" note={1}>consectetur adipiscing elit</InlineCitation>. Vestibulum id nibh sed enim viverra porta, nec dignissim lorem luctus. Integer scelerisque nunc sed arcu facilisis, quis ullamcorper arcu suscipit. Curabitur dictum, massa sit amet tempor ullamcorper, lacus risus volutpat mauris, nec varius odio nibh et turpis.
 
-Aliquam erat volutpat. Donec at sem vel sem condimentum aliquet. Suspendisse quis risus non lorem bibendum posuere. Etiam <img src="/images/inline-wave.svg" alt="wave thumbnail" class="inline-image" /> posuere, dolor non commodo tempor, neque ligula fringilla lacus, non porta neque eros ac est. Nulla facilisi. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas.
+Aliquam erat volutpat. Donec at sem vel sem condimentum aliquet. Suspendisse quis risus non lorem <InlineCitation refId="ref-2" citeId="cite-2" note={2}>bibendum posuere</InlineCitation>. Etiam posuere, dolor non commodo tempor, neque ligula fringilla lacus, non porta neque eros ac est. Nulla facilisi. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas.
+
+Inline callouts can live directly in running text, for example{" "}<InlineHighlight>deferred value</InlineHighlight>{" "}and{" "}<InlineHighlight tone="neutral">baseline output</InlineHighlight>{" "}without breaking paragraph flow.
+
+Phrase-level citations can cite full concepts inline, such as{" "}<InlineCitation refId="ref-1" citeId="cite-phrase-1" note={1}>few-shot learner behavior</InlineCitation>{" "}and{" "}<InlineCitation refId="ref-2" citeId="cite-phrase-2" note={2}>scaling laws for model quality</InlineCitation>, not just superscript footnotes.
+
+<ArticleHighlight title="Note">
+  <p>This is a reusable highlighted paragraph block with a title, built for post content where you want emphasis without changing layout rhythm.</p>
+  <p>It keeps the same minimal visual language: black border, no rounded corners, and a restrained blue background accent.</p>
+</ArticleHighlight>
+
+## List Formatting Stress
+
+This section shows how list styles render across multiple structures and content lengths.
+
+### Unordered List (Flat)
+
+- Short item.
+- Another short item.
+- Longer item with more realistic editorial copy that wraps to multiple lines so you can judge line-height, marker alignment, and readability in dense post layouts.
+- Long item with inline formatting, including <InlineHighlight>highlighted text</InlineHighlight> and an <InlineCitation refId="ref-1" note={1}>inline citation</InlineCitation> to test mixed inline content inside a bullet.
+
+### Ordered List (Flat)
+
+1. Initialize the experiment.
+2. Run the baseline pass and capture initial observations.
+3. Compare deltas across the primary dimensions, documenting any regression risk and any qualitative interpretation that requires a longer sentence.
+4. Publish a concise summary and references.
+
+### Unordered List (Nested)
+
+- Parent item: short.
+  - Child item: short.
+  - Child item: longer supporting detail that wraps and should stay aligned cleanly under the same bullet hierarchy.
+- Parent item: mixed children.
+  1. Nested ordered item one.
+  2. Nested ordered item two with long text to confirm spacing remains consistent in cross-type nesting.
+
+### Ordered List (Nested)
+
+1. Phase one.
+   1. Sub-phase one.
+      - Nested unordered checkpoint with short text.
+      - Nested unordered checkpoint with longer text that runs over multiple lines for visual stress testing.
+   2. Sub-phase two.
+2. Phase two with a longer summary line that demonstrates number marker alignment for wrapped lines in deeper hierarchy levels.
 
 Mauris et lectus vitae metus pellentesque consequat. Integer porttitor pretium mauris, a suscipit neque laoreet non. Donec mollis lacus in arcu sollicitudin, at rhoncus nisi luctus.
 
@@ -491,9 +539,9 @@ Use this section to stress-test desktop side-by-side composition while keeping m
   </div>
 </SplitGrid>
 
-## Inline Images Mid-Flow
+## Mid-Flow Image Blocks
 
-Donec vulputate fermentum nibh, in convallis arcu interdum a. Sed ullamcorper <img src="/images/inline-bars.svg" alt="bars thumbnail" class="inline-image" /> justo quis dolor fermentum, sed suscipit orci hendrerit. Cras in semper turpis. In quis <img src="/images/inline-grid.svg" alt="grid thumbnail" class="inline-image" /> nibh in enim laoreet commodo sed et arcu. Morbi vitae nulla quis neque semper feugiat.
+Donec vulputate fermentum nibh, in convallis arcu interdum a. Sed ullamcorper justo quis dolor fermentum, sed suscipit orci hendrerit. Cras in semper turpis. In quis nibh in enim laoreet commodo sed et arcu. Morbi vitae nulla quis neque semper feugiat.
 
 Phasellus accumsan mauris vitae tristique elementum. Sed rhoncus nibh sapien, nec vulputate lorem pulvinar vel. Nulla blandit facilisis sem, non gravida arcu tincidunt in.
 
@@ -511,7 +559,7 @@ Integer ut lorem id dui porta volutpat eu at turpis. Donec viverra dictum pretiu
 
 ## Chart Stack Two
 
-Vivamus feugiat, purus et facilisis efficitur, lacus massa vulputate lacus, non suscipit lorem ligula non elit.
+Vivamus feugiat, purus et facilisis efficitur, lacus massa vulputate lacus, <InlineCitation refId="ref-3" citeId="cite-3" note={3}>non suscipit lorem ligula non elit</InlineCitation>.
 
 <ThroughputTrafficStack client:load />
 
@@ -523,4 +571,30 @@ pnpm astro preview
 # quick visual pass: post width, code rhythm, chart legibility, mobile stacking
 ```
 
-Integer vel turpis pretium, volutpat mauris et, bibendum nisl. Cras vitae lorem sed eros suscipit vulputate. Fusce egestas luctus ligula non dictum. Praesent non arcu felis. Suspendisse sit amet purus quam. Nulla feugiat ornare consequat.
+Integer vel turpis pretium, volutpat mauris et, bibendum nisl. Cras vitae lorem sed eros suscipit vulputate. Fusce egestas luctus ligula non dictum. <InlineCitation refId="ref-4" citeId="cite-4" note={4}>Praesent non arcu felis</InlineCitation>. Suspendisse sit amet purus quam. Nulla feugiat ornare consequat.
+
+<footer class="article-references" aria-labelledby="references-heading">
+  <h2 id="references-heading">References</h2>
+  <ol class="article-references-list">
+    <li id="ref-1">
+      Brown, T., Mann, B., Ryder, N., et al. (2020). <em>Language Models are Few-Shot Learners</em>. Advances in Neural Information Processing Systems, 33, 1877-1901.
+      <a href="https://proceedings.neurips.cc/paper/2020/hash/1457c0d6bfcb4967418bfb8ac142f64a-Abstract.html" target="_blank" rel="noreferrer">Link</a>
+      <a href="#cite-1" class="article-citation-backlink" aria-label="Back to citation 1">↩</a>
+    </li>
+    <li id="ref-2">
+      Kaplan, J., McCandlish, S., Henighan, T., et al. (2020). <em>Scaling Laws for Neural Language Models</em>. arXiv.
+      <a href="https://arxiv.org/abs/2001.08361" target="_blank" rel="noreferrer">Link</a>
+      <a href="#cite-2" class="article-citation-backlink" aria-label="Back to citation 2">↩</a>
+    </li>
+    <li id="ref-3">
+      OpenAI. (2024). <em>GPT-4 Technical Report</em>. arXiv.
+      <a href="https://arxiv.org/abs/2303.08774" target="_blank" rel="noreferrer">Link</a>
+      <a href="#cite-3" class="article-citation-backlink" aria-label="Back to citation 3">↩</a>
+    </li>
+    <li id="ref-4">
+      Sutton, R. (2019). <em>The Bitter Lesson</em>.
+      <a href="http://www.incompleteideas.net/IncIdeas/BitterLesson.html" target="_blank" rel="noreferrer">Link</a>
+      <a href="#cite-4" class="article-citation-backlink" aria-label="Back to citation 4">↩</a>
+    </li>
+  </ol>
+</footer>
