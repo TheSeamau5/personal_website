@@ -1,0 +1,49 @@
+@import "tailwindcss";
+
+@font-face {
+  font-family: "Libre Baskerville";
+  src: url("/fonts/libre-baskerville-latin-400-normal.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: block;
+}
+
+@font-face {
+  font-family: "Libre Baskerville";
+  src: url("/fonts/libre-baskerville-latin-700-normal.woff2") format("woff2");
+  font-weight: 700;
+  font-style: normal;
+  font-display: block;
+}
+
+:root {
+  --font-ui: "Source Serif 4", "Apple Garamond", Baskerville, "Libre Baskerville", "Droid Serif",
+    "Times New Roman", Times, serif, "Noto Emoji", Quivira;
+  --font-reading: "Source Serif 4", "Apple Garamond", Baskerville, "Libre Baskerville",
+    "Droid Serif", "Times New Roman", Times, serif, "Noto Emoji", Quivira;
+  --font-display: "Libre Baskerville", "PT Serif", "Source Serif 4", "Apple Garamond", Baskerville,
+    "Droid Serif", "Times New Roman", Times, serif, "Noto Emoji", Quivira;
+}
+
+body {
+  font-family: var(--font-ui);
+}
+
+.article-content {
+  font-family: var(--font-reading);
+}
+
+.display-title {
+  font-family: var(--font-display);
+  letter-spacing: 0.01em;
+}
+
+.article-content p {
+  font-size: clamp(1.28rem, 1.08rem + 0.62vw, 1.6rem);
+  line-height: 1.72;
+  margin-top: 1.2em;
+}
+
+.article-content p:first-child {
+  margin-top: 0;
+}

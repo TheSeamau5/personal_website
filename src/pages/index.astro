@@ -1,0 +1,48 @@
+---
+import { getCollection } from 'astro:content';
+import Layout from '../layouts/Layout.astro';
+
+const posts = (await getCollection('posts')).sort(
+  (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf()
+);
+---
+
+<Layout title="Home | Personal Website">
+  <main class="mx-auto w-full max-w-384 px-4 py-4 md:px-8 md:py-6">
+    <section class="px-0 py-3 md:border md:border-black md:px-10 md:py-11">
+      <h1 class="display-title text-5xl font-semibold leading-none tracking-tight md:text-7xl">
+        Hassan Hayat
+      </h1>
+      <p class="mt-6 max-w-3xl text-xl leading-relaxed text-zinc-800 md:text-2xl">
+        Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut
+        labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco
+        laboris nisi ut aliquip ex ea commodo consequat.
+      </p>
+    </section>
+
+    <section class="mt-8 px-0 py-2 md:mt-12 md:border md:border-black md:px-10 md:py-10" id="posts">
+      <h2 class="text-sm font-semibold uppercase tracking-[0.2em] text-zinc-600">Posts</h2>
+      <ul class="mt-7 flex flex-col gap-5">
+        {posts.map((post) => (
+          <li class="border-l-2 border-black/80 pl-5">
+            <a
+              href={`/posts/${post.slug}/`}
+              class="display-title text-3xl font-semibold leading-tight transition hover:opacity-75 md:text-4xl"
+            >
+              {post.data.title}
+            </a>
+            <p class="mt-2 text-base text-zinc-600">
+              {post.data.author} ·
+              {new Intl.DateTimeFormat('en-US', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+                timeZone: 'UTC'
+              }).format(post.data.pubDate)}
+            </p>
+          </li>
+        ))}
+      </ul>
+    </section>
+  </main>
+</Layout>

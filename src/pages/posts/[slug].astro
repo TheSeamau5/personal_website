@@ -1,0 +1,40 @@
+---
+import { getCollection, render } from 'astro:content';
+import Layout from '../../layouts/Layout.astro';
+
+export async function getStaticPaths() {
+  const posts = await getCollection('posts');
+  return posts.map((post) => ({
+    params: { slug: post.slug },
+    props: { post }
+  }));
+}
+
+const { post } = Astro.props;
+const { Content } = await render(post);
+---
+
+<Layout title={`${post.data.title} | Personal Website`}>
+  <main class="mx-auto w-full max-w-384 px-4 py-4 md:px-8 md:py-6">
+    <article class="px-0 py-2 md:border md:border-black md:px-12 md:py-12">
+      <header class="border-b border-black pb-8">
+        <h1 class="display-title text-5xl font-semibold leading-none tracking-tight md:text-7xl">
+          {post.data.title}
+        </h1>
+        <p class="mt-4 text-base text-zinc-600">
+          {post.data.author} ·
+          {new Intl.DateTimeFormat('en-US', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+            timeZone: 'UTC'
+          }).format(post.data.pubDate)}
+        </p>
+      </header>
+
+      <div class="article-content mt-10 max-w-none">
+        <Content />
+      </div>
+    </article>
+  </main>
+</Layout>

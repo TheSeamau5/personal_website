@@ -1,0 +1,62 @@
+---
+import '../styles/global.css';
+
+interface Props {
+  title?: string;
+}
+
+const { title = 'Personal Website' } = Astro.props;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width" />
+    <link
+      rel="preload"
+      href="/fonts/libre-baskerville-latin-400-normal.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
+    <link
+      rel="preload"
+      href="/fonts/libre-baskerville-latin-700-normal.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" href="/favicon.ico" />
+    <meta name="generator" content={Astro.generator} />
+    <title>{title}</title>
+  </head>
+  <body class="bg-white text-zinc-950 antialiased">
+    <header class="border-b border-black/25">
+      <div class="mx-auto flex w-full max-w-384 items-center justify-between px-4 py-3 md:px-8">
+        <nav class="flex items-center gap-5 text-sm uppercase tracking-[0.12em] md:gap-8">
+          <a href="/" class="transition hover:opacity-60">Home</a>
+          <a href="/blog/" class="transition hover:opacity-60">Blog</a>
+          <a
+            href="https://twitter.com"
+            class="hidden transition hover:opacity-60 md:inline"
+            target="_blank"
+            rel="noreferrer"
+          >
+            Twitter
+          </a>
+          <a
+            href="https://github.com"
+            class="hidden transition hover:opacity-60 md:inline"
+            target="_blank"
+            rel="noreferrer"
+          >
+            GitHub
+          </a>
+        </nav>
+      </div>
+    </header>
+    <slot />
+  </body>
+</html>
