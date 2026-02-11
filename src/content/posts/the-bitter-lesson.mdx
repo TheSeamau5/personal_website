@@ -1,0 +1,526 @@
+---
+title: Lorem Ipsum Stress Test
+pubDate: 2026-02-11
+description: Long-form visual stress test with dense prose, code blocks, inline images, and monochrome blue-accent charts.
+---
+
+import SplitGrid from "@/components/SplitGrid.astro"
+import {
+  EngagementChartStack,
+  ThroughputSnapshotCard,
+  ThroughputTrafficStack,
+} from "@/components/post-chart-blocks"
+
+Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vestibulum id nibh sed enim viverra porta, nec dignissim lorem luctus. Integer <img src="/images/inline-grid.svg" alt="grid thumbnail" class="inline-image" /> scelerisque nunc sed arcu facilisis, quis ullamcorper arcu suscipit. Curabitur dictum, massa sit amet tempor ullamcorper, lacus risus volutpat mauris, nec varius odio nibh et turpis.
+
+Aliquam erat volutpat. Donec at sem vel sem condimentum aliquet. Suspendisse quis risus non lorem bibendum posuere. Etiam <img src="/images/inline-wave.svg" alt="wave thumbnail" class="inline-image" /> posuere, dolor non commodo tempor, neque ligula fringilla lacus, non porta neque eros ac est. Nulla facilisi. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas.
+
+Mauris et lectus vitae metus pellentesque consequat. Integer porttitor pretium mauris, a suscipit neque laoreet non. Donec mollis lacus in arcu sollicitudin, at rhoncus nisi luctus.
+
+<figure class="article-image-block">
+  <img
+    src="https://picsum.photos/id/237/1600/900"
+    alt="A wide blueprint-like visualization with blue trend lines over a soft neutral grid."
+    class="article-full-image"
+    loading="lazy"
+  />
+  <figcaption class="image-caption">Full-width image test with attached caption and hover alt-text control.</figcaption>
+</figure>
+
+Morbi in sem ac enim faucibus feugiat. Sed consequat id elit non aliquet. Suspendisse efficitur massa sit amet arcu lacinia, at malesuada nisl tristique. Nulla auctor sapien vitae purus luctus faucibus.
+
+## Code Block Stress
+
+The point here is to test readability and visual rhythm with realistic long snippets in between dense paragraphs. Integer varius augue in eros sodales, a ultrices nibh convallis.
+
+<div class="code-block-title">Streaming Quality Pipeline</div>
+
+```ts
+type Quality = "ok" | "warn" | "bad";
+
+type Sample = {
+  timestamp: number;
+  source: string;
+  value: number;
+  quality: Quality;
+};
+
+type WindowStats = {
+  source: string;
+  start: number;
+  end: number;
+  min: number;
+  max: number;
+  mean: number;
+  median: number;
+  p95: number;
+  outlierCount: number;
+  qualityScore: number;
+};
+
+type Alert = {
+  source: string;
+  level: "info" | "warning" | "critical";
+  message: string;
+  at: number;
+};
+
+function median(values: number[]): number {
+  if (values.length === 0) return 0;
+  const sorted = [...values].sort((a, b) => a - b);
+  const mid = Math.floor(sorted.length / 2);
+  return sorted.length % 2 === 0
+    ? (sorted[mid - 1] + sorted[mid]) / 2
+    : sorted[mid];
+}
+
+function quantile(values: number[], q: number): number {
+  if (values.length === 0) return 0;
+  const sorted = [...values].sort((a, b) => a - b);
+  const pos = (sorted.length - 1) * q;
+  const base = Math.floor(pos);
+  const rest = pos - base;
+  return sorted[base + 1] !== undefined
+    ? sorted[base] + rest * (sorted[base + 1] - sorted[base])
+    : sorted[base];
+}
+
+function robustZScore(value: number, values: number[]): number {
+  const med = median(values);
+  const absDev = values.map((v) => Math.abs(v - med));
+  const mad = median(absDev) || 1e-9;
+  return 0.6745 * ((value - med) / mad);
+}
+
+class StreamAnalyzer {
+  private readonly bySource = new Map<string, Sample[]>();
+  private readonly maxSamplesPerSource: number;
+
+  constructor(maxSamplesPerSource = 10_000) {
+    this.maxSamplesPerSource = maxSamplesPerSource;
+  }
+
+  ingest(sample: Sample): void {
+    if (!this.bySource.has(sample.source)) this.bySource.set(sample.source, []);
+    const bucket = this.bySource.get(sample.source)!;
+    bucket.push(sample);
+    if (bucket.length > this.maxSamplesPerSource) {
+      bucket.splice(0, bucket.length - this.maxSamplesPerSource);
+    }
+  }
+
+  ingestBatch(batch: Sample[]): void {
+    for (const sample of batch) this.ingest(sample);
+  }
+
+  computeWindow(source: string, start: number, end: number): WindowStats | null {
+    const samples = (this.bySource.get(source) ?? []).filter(
+      (s) => s.timestamp >= start && s.timestamp <= end
+    );
+    if (samples.length === 0) return null;
+
+    const values = samples.map((s) => s.value);
+    const min = Math.min(...values);
+    const max = Math.max(...values);
+    const mean = values.reduce((sum, n) => sum + n, 0) / values.length;
+    const med = median(values);
+    const p95 = quantile(values, 0.95);
+
+    let outlierCount = 0;
+    for (const v of values) {
+      if (Math.abs(robustZScore(v, values)) > 3.5) outlierCount += 1;
+    }
+
+    const qualityScore = this.computeQualityScore(samples, outlierCount);
+
+    return {
+      source,
+      start,
+      end,
+      min,
+      max,
+      mean: Number(mean.toFixed(3)),
+      median: Number(med.toFixed(3)),
+      p95: Number(p95.toFixed(3)),
+      outlierCount,
+      qualityScore,
+    };
+  }
+
+  evaluateAlerts(stats: WindowStats): Alert[] {
+    const alerts: Alert[] = [];
+    if (stats.qualityScore < 60) {
+      alerts.push({
+        source: stats.source,
+        level: "critical",
+        message: "Quality score dropped below 60.",
+        at: stats.end,
+      });
+    } else if (stats.qualityScore < 80) {
+      alerts.push({
+        source: stats.source,
+        level: "warning",
+        message: "Quality score is degrading.",
+        at: stats.end,
+      });
+    }
+
+    if (stats.outlierCount > 6) {
+      alerts.push({
+        source: stats.source,
+        level: "warning",
+        message: `High outlier count in window: ${stats.outlierCount}`,
+        at: stats.end,
+      });
+    }
+
+    if (stats.p95 > stats.mean * 1.25) {
+      alerts.push({
+        source: stats.source,
+        level: "info",
+        message: "Tail latency drift detected (p95 vs mean).",
+        at: stats.end,
+      });
+    }
+
+    return alerts;
+  }
+
+  private computeQualityScore(samples: Sample[], outlierCount: number): number {
+    const total = samples.length;
+    const bad = samples.filter((s) => s.quality === "bad").length;
+    const warn = samples.filter((s) => s.quality === "warn").length;
+
+    const qualityPenalty = bad * 3 + warn;
+    const outlierPenalty = outlierCount * 1.5;
+    const raw = 100 - qualityPenalty - outlierPenalty;
+    return Math.max(0, Number(raw.toFixed(2)));
+  }
+}
+
+function simulateBatch(source: string, startTs: number, count: number): Sample[] {
+  const output: Sample[] = [];
+  let value = 45 + Math.random() * 5;
+
+  for (let i = 0; i < count; i += 1) {
+    const t = startTs + i * 60_000;
+    const drift = Math.sin(i / 18) * 2.4;
+    const noise = (Math.random() - 0.5) * 1.8;
+    const anomaly = i % 97 === 0 ? 12 + Math.random() * 7 : 0;
+
+    value = Math.max(0, value + drift * 0.2 + noise + anomaly);
+    const quality: Quality = anomaly > 0 ? "warn" : Math.random() > 0.99 ? "bad" : "ok";
+    output.push({ timestamp: t, source, value: Number(value.toFixed(3)), quality });
+  }
+
+  return output;
+}
+
+const analyzer = new StreamAnalyzer(20_000);
+const start = Date.now() - 6 * 60 * 60 * 1000;
+
+analyzer.ingestBatch(simulateBatch("ingest-api", start, 360));
+analyzer.ingestBatch(simulateBatch("indexer", start, 360));
+analyzer.ingestBatch(simulateBatch("realtime-feed", start, 360));
+
+for (const source of ["ingest-api", "indexer", "realtime-feed"]) {
+  const stats = analyzer.computeWindow(source, start, Date.now());
+  if (!stats) continue;
+  const alerts = analyzer.evaluateAlerts(stats);
+  console.log(source, stats, alerts);
+}
+```
+
+Morbi gravida lectus at velit aliquet, ut fermentum arcu volutpat. Nam dictum turpis et sem lacinia, vel maximus odio suscipit. Mauris id rutrum arcu, sed pellentesque arcu. Integer pretium tincidunt ligula, non posuere mauris cursus eget.
+
+<div class="code-block-title">CPU Ray Tracer (Recursive Reflections)</div>
+
+```cpp
+#include <algorithm>
+#include <cmath>
+#include <cstdint>
+#include <fstream>
+#include <iostream>
+#include <limits>
+#include <optional>
+#include <vector>
+
+struct Vec3 {
+  double x = 0.0;
+  double y = 0.0;
+  double z = 0.0;
+
+  Vec3() = default;
+  Vec3(double x_, double y_, double z_) : x(x_), y(y_), z(z_) {}
+
+  Vec3 operator+(const Vec3& other) const { return {x + other.x, y + other.y, z + other.z}; }
+  Vec3 operator-(const Vec3& other) const { return {x - other.x, y - other.y, z - other.z}; }
+  Vec3 operator*(double s) const { return {x * s, y * s, z * s}; }
+  Vec3 operator/(double s) const { return {x / s, y / s, z / s}; }
+
+  Vec3& operator+=(const Vec3& other) {
+    x += other.x;
+    y += other.y;
+    z += other.z;
+    return *this;
+  }
+};
+
+inline double dot(const Vec3& a, const Vec3& b) {
+  return a.x * b.x + a.y * b.y + a.z * b.z;
+}
+
+inline Vec3 normalize(const Vec3& v) {
+  double len = std::sqrt(dot(v, v));
+  if (len == 0.0) return {0, 0, 0};
+  return v / len;
+}
+
+inline Vec3 reflect(const Vec3& i, const Vec3& n) {
+  return i - n * (2.0 * dot(i, n));
+}
+
+inline Vec3 clamp01(const Vec3& c) {
+  auto clamp = [](double v) { return std::max(0.0, std::min(1.0, v)); };
+  return {clamp(c.x), clamp(c.y), clamp(c.z)};
+}
+
+struct Ray {
+  Vec3 origin;
+  Vec3 direction;
+};
+
+struct Material {
+  Vec3 albedo;
+  double specular = 32.0;
+  double reflectivity = 0.0;
+};
+
+struct Sphere {
+  Vec3 center;
+  double radius;
+  Material material;
+};
+
+struct Hit {
+  double t;
+  Vec3 point;
+  Vec3 normal;
+  Material material;
+};
+
+std::optional<Hit> intersectSphere(const Ray& ray, const Sphere& s, double tMin, double tMax) {
+  Vec3 oc = ray.origin - s.center;
+  double a = dot(ray.direction, ray.direction);
+  double b = 2.0 * dot(oc, ray.direction);
+  double c = dot(oc, oc) - s.radius * s.radius;
+  double discriminant = b * b - 4.0 * a * c;
+  if (discriminant < 0.0) return std::nullopt;
+
+  double sqrtD = std::sqrt(discriminant);
+  double root = (-b - sqrtD) / (2.0 * a);
+  if (root < tMin || root > tMax) {
+    root = (-b + sqrtD) / (2.0 * a);
+    if (root < tMin || root > tMax) return std::nullopt;
+  }
+
+  Vec3 point = ray.origin + ray.direction * root;
+  Vec3 normal = normalize(point - s.center);
+  return Hit{root, point, normal, s.material};
+}
+
+std::optional<Hit> traceScene(const Ray& ray, const std::vector<Sphere>& scene) {
+  double closest = std::numeric_limits<double>::max();
+  std::optional<Hit> best = std::nullopt;
+  for (const auto& sphere : scene) {
+    auto hit = intersectSphere(ray, sphere, 0.001, closest);
+    if (hit.has_value()) {
+      closest = hit->t;
+      best = hit;
+    }
+  }
+  return best;
+}
+
+Vec3 skyColor(const Ray& ray) {
+  double t = 0.5 * (normalize(ray.direction).y + 1.0);
+  return Vec3(1.0, 1.0, 1.0) * (1.0 - t) + Vec3(0.5, 0.7, 1.0) * t;
+}
+
+Vec3 shade(const Hit& hit, const Ray& ray, const std::vector<Sphere>& scene, int depth);
+
+Vec3 trace(const Ray& ray, const std::vector<Sphere>& scene, int depth) {
+  if (depth <= 0) return Vec3(0.0, 0.0, 0.0);
+  auto hit = traceScene(ray, scene);
+  if (!hit.has_value()) return skyColor(ray);
+  return shade(*hit, ray, scene, depth);
+}
+
+Vec3 shade(const Hit& hit, const Ray& ray, const std::vector<Sphere>& scene, int depth) {
+  Vec3 lightPos(6.0, 8.0, -3.0);
+  Vec3 lightColor(1.0, 1.0, 1.0);
+  Vec3 ambient(0.08, 0.08, 0.08);
+
+  Vec3 toLight = normalize(lightPos - hit.point);
+  Ray shadowRay{hit.point + hit.normal * 0.002, toLight};
+  bool inShadow = traceScene(shadowRay, scene).has_value();
+
+  double diffuse = inShadow ? 0.0 : std::max(0.0, dot(hit.normal, toLight));
+  Vec3 viewDir = normalize(ray.origin - hit.point);
+  Vec3 reflectDir = normalize(reflect(toLight * -1.0, hit.normal));
+  double spec = inShadow ? 0.0 : std::pow(std::max(0.0, dot(viewDir, reflectDir)), hit.material.specular);
+
+  Vec3 base = hit.material.albedo * diffuse + lightColor * spec * 0.35 + ambient;
+
+  if (hit.material.reflectivity > 0.0) {
+    Vec3 reflDir = normalize(reflect(ray.direction, hit.normal));
+    Ray reflRay{hit.point + hit.normal * 0.002, reflDir};
+    Vec3 reflected = trace(reflRay, scene, depth - 1);
+    base = base * (1.0 - hit.material.reflectivity) + reflected * hit.material.reflectivity;
+  }
+
+  return clamp01(base);
+}
+
+int main() {
+  const int width = 960;
+  const int height = 540;
+  const int maxDepth = 4;
+  const double fov = 60.0;
+  const double aspect = static_cast<double>(width) / static_cast<double>(height);
+  const double scale = std::tan((fov * 0.5) * 3.1415926535 / 180.0);
+
+  std::vector<Sphere> scene = {
+    {{0.0, -1001.0, 4.0}, 1000.0, {{0.7, 0.7, 0.7}, 8.0, 0.0}},
+    {{-1.6, 0.2, 5.5}, 1.2, {{0.1, 0.2, 0.95}, 64.0, 0.35}},
+    {{1.8, 0.4, 6.2}, 1.4, {{0.85, 0.2, 0.2}, 48.0, 0.15}},
+    {{0.4, 1.6, 7.4}, 0.9, {{0.15, 0.85, 0.45}, 96.0, 0.6}},
+  };
+
+  Vec3 camera(0.0, 1.0, -2.8);
+  std::vector<Vec3> framebuffer(width * height);
+
+  for (int y = 0; y < height; ++y) {
+    for (int x = 0; x < width; ++x) {
+      double px = (2.0 * (x + 0.5) / width - 1.0) * aspect * scale;
+      double py = (1.0 - 2.0 * (y + 0.5) / height) * scale;
+      Vec3 dir = normalize(Vec3(px, py, 1.0));
+      framebuffer[y * width + x] = trace(Ray{camera, dir}, scene, maxDepth);
+    }
+  }
+
+  std::ofstream out("raytrace.ppm");
+  out << "P3\n" << width << " " << height << "\n255\n";
+  for (const auto& c : framebuffer) {
+    int r = static_cast<int>(255.99 * c.x);
+    int g = static_cast<int>(255.99 * c.y);
+    int b = static_cast<int>(255.99 * c.z);
+    out << r << " " << g << " " << b << "\n";
+  }
+  out.close();
+
+  std::cout << "Rendered raytrace.ppm (" << width << "x" << height << ")\n";
+  return 0;
+}
+```
+
+## Chart Stack One
+
+Below is a monochrome + blue line chart inspired by shadcn chart card composition.
+
+<EngagementChartStack client:load />
+
+Pellentesque in bibendum odio. Suspendisse potenti. Aenean malesuada interdum elit, et tincidunt lorem scelerisque vitae. Ut interdum justo sem, sed interdum libero luctus at. Duis eu nunc justo. Maecenas sed interdum lorem.
+
+## Responsive Two-Column Grids
+
+Use this section to stress-test desktop side-by-side composition while keeping mobile single-column behavior.
+
+<SplitGrid>
+  <div slot="left">
+    <ThroughputSnapshotCard client:load />
+  </div>
+  <div slot="right" class="split-copy">
+    <h3>Chart + Explanation</h3>
+    <p>This split block uses a chart component on the left and analysis copy on the right. On desktop they align side by side, and on mobile they stack vertically.</p>
+    <p>Because the grid is generic, either side can contain rich text, media, charts, code, or any other block-level component without hardcoded assumptions.</p>
+  </div>
+</SplitGrid>
+
+<SplitGrid reverse>
+  <div slot="left" class="split-copy">
+    <h3>Text + Image (Reversed)</h3>
+    <p>This variation intentionally flips the visual order at desktop widths. It demonstrates the same reusable grid behavior with the opposite content emphasis.</p>
+    <p>The image uses a wider aspect ratio so it reads as a panoramic element instead of a tall block that dominates vertical rhythm.</p>
+  </div>
+  <div slot="right">
+    <figure class="article-image-block">
+      <img
+        src="https://picsum.photos/id/1024/1800/780"
+        alt="A broad landscape frame with soft texture and high width-to-height ratio."
+        class="article-full-image"
+        loading="lazy"
+      />
+      <figcaption class="image-caption">Widescreen image paired with explanatory text in a desktop split layout.</figcaption>
+    </figure>
+  </div>
+</SplitGrid>
+
+<SplitGrid>
+  <div slot="left">
+    <figure class="article-image-block">
+      <img
+        src="https://picsum.photos/id/1069/1800/780"
+        alt="Wide mountain scene used as left item in a two-image split composition."
+        class="article-full-image"
+        loading="lazy"
+      />
+      <figcaption class="image-caption">Image one in a reusable two-column media grid.</figcaption>
+    </figure>
+  </div>
+  <div slot="right">
+    <figure class="article-image-block">
+      <img
+        src="https://picsum.photos/id/1040/1800/780"
+        alt="Wide cloud-and-water scene used as right item in a two-image split composition."
+        class="article-full-image"
+        loading="lazy"
+      />
+      <figcaption class="image-caption">Image two aligned beside image one on desktop.</figcaption>
+    </figure>
+  </div>
+</SplitGrid>
+
+## Inline Images Mid-Flow
+
+Donec vulputate fermentum nibh, in convallis arcu interdum a. Sed ullamcorper <img src="/images/inline-bars.svg" alt="bars thumbnail" class="inline-image" /> justo quis dolor fermentum, sed suscipit orci hendrerit. Cras in semper turpis. In quis <img src="/images/inline-grid.svg" alt="grid thumbnail" class="inline-image" /> nibh in enim laoreet commodo sed et arcu. Morbi vitae nulla quis neque semper feugiat.
+
+Phasellus accumsan mauris vitae tristique elementum. Sed rhoncus nibh sapien, nec vulputate lorem pulvinar vel. Nulla blandit facilisis sem, non gravida arcu tincidunt in.
+
+<figure class="article-image-block">
+  <img
+    src="https://picsum.photos/id/870/1600/900?grayscale&blur=1"
+    alt="An abstract full-width landscape with layered geometric forms and a blue highlighted signal line."
+    class="article-full-image"
+    loading="lazy"
+  />
+  <figcaption class="image-caption">Second full-width image block to test repeated paragraph-image-paragraph rhythm.</figcaption>
+</figure>
+
+Integer ut lorem id dui porta volutpat eu at turpis. Donec viverra dictum pretium. Sed feugiat commodo ligula, id faucibus neque sollicitudin ac.
+
+## Chart Stack Two
+
+Vivamus feugiat, purus et facilisis efficitur, lacus massa vulputate lacus, non suscipit lorem ligula non elit.
+
+<ThroughputTrafficStack client:load />
+
+Curabitur eu neque a lectus tincidunt gravida. Sed sed arcu ullamcorper, vulputate augue vitae, ultricies velit. Nam blandit justo nec nibh interdum, vitae tristique sapien placerat. Vestibulum porttitor dolor sit amet lacus accumsan, non ultrices arcu aliquet.
+
+```bash
+pnpm astro build
+pnpm astro preview
+# quick visual pass: post width, code rhythm, chart legibility, mobile stacking
+```
+
+Integer vel turpis pretium, volutpat mauris et, bibendum nisl. Cras vitae lorem sed eros suscipit vulputate. Fusce egestas luctus ligula non dictum. Praesent non arcu felis. Suspendisse sit amet purus quam. Nulla feugiat ornare consequat.

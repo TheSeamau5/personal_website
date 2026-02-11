@@ -12,7 +12,7 @@ const { title = 'Personal Website' } = Astro.props;
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <link
       rel="preload"
       href="/fonts/libre-baskerville-latin-400-normal.woff2"
@@ -33,7 +33,7 @@ const { title = 'Personal Website' } = Astro.props;
     <title>{title}</title>
   </head>
   <body class="bg-white text-zinc-950 antialiased">
-    <header class="border-b border-black/25">
+    <header class="border-b border-black">
       <div class="mx-auto flex w-full max-w-384 items-center justify-between px-4 py-3 md:px-8">
         <nav class="flex items-center gap-5 text-sm uppercase tracking-[0.12em] md:gap-8">
           <a href="/" class="transition hover:opacity-60">Home</a>

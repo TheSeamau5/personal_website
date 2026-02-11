@@ -19,7 +19,6 @@ const posts = (await getCollection('posts')).sort(
               {post.data.title}
             </a>
             <p class="mt-2 text-base text-zinc-600">
-              {post.data.author} ·
               {new Intl.DateTimeFormat('en-US', {
                 year: 'numeric',
                 month: 'long',

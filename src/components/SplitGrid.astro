@@ -1,0 +1,25 @@
+---
+interface Props {
+  reverse?: boolean;
+  align?: "start" | "center";
+  class?: string;
+}
+
+const { reverse = false, align = "start", class: className = "" } = Astro.props;
+---
+
+<div
+  class:list={[
+    "split-grid",
+    reverse && "is-reverse",
+    align === "center" && "is-center",
+    className,
+  ]}
+>
+  <div class="split-grid-item">
+    <slot name="left" />
+  </div>
+  <div class="split-grid-item">
+    <slot name="right" />
+  </div>
+</div>

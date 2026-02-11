@@ -22,7 +22,6 @@ const { Content } = await render(post);
           {post.data.title}
         </h1>
         <p class="mt-4 text-base text-zinc-600">
-          {post.data.author} ·
           {new Intl.DateTimeFormat('en-US', {
             year: 'numeric',
             month: 'long',
@@ -37,4 +36,213 @@ const { Content } = await render(post);
       </div>
     </article>
   </main>
+
+  <script is:inline>
+    const copyIconSvg =
+      '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="10" height="10" fill="none" stroke="currentColor" stroke-width="2"></rect><path d="M5 15V5h10" fill="none" stroke="currentColor" stroke-width="2"></path></svg>';
+    const checkIconSvg =
+      '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12l4 4 10-10" fill="none" stroke="currentColor" stroke-width="2"></path></svg>';
+
+    const copyToClipboard = async (text) => {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        await navigator.clipboard.writeText(text);
+        return;
+      }
+      throw new Error('Clipboard API unavailable in this context');
+    };
+
+    const formatCodeLanguage = (language) => {
+      const normalized = (language ?? '').trim().toLowerCase();
+      if (!normalized) return '';
+      if (normalized === 'ts' || normalized === 'tsx') return 'TypeScript';
+      if (normalized === 'js' || normalized === 'jsx') return 'JavaScript';
+      if (normalized === 'cpp') return 'C++';
+      if (normalized === 'sh' || normalized === 'bash') return 'Bash';
+      if (normalized === 'md' || normalized === 'markdown') return 'Markdown';
+      return '';
+    };
+
+    const initializeCodeBlockHeaders = () => {
+      document.querySelectorAll('.article-content pre').forEach((preElement) => {
+        if (preElement.dataset.headerReady === 'true') return;
+        preElement.dataset.headerReady = 'true';
+
+        const parent = preElement.parentElement;
+        if (!parent) return;
+
+        const previousSibling = preElement.previousElementSibling;
+        let title = '';
+        if (previousSibling?.classList.contains('code-block-title')) {
+          title = (previousSibling.textContent ?? '').trim();
+          previousSibling.remove();
+        }
+
+        const shell = document.createElement('div');
+        shell.className = 'code-block-shell';
+
+        const header = document.createElement('div');
+        header.className = 'code-block-header';
+
+        const titleElement = document.createElement('span');
+        titleElement.className = 'code-block-header-title';
+        titleElement.textContent = title || 'Code';
+
+        const headerMetaElement = document.createElement('div');
+        headerMetaElement.className = 'code-block-header-meta';
+
+        const language = formatCodeLanguage(preElement.dataset.language);
+        if (language) {
+          const languageElement = document.createElement('span');
+          languageElement.className = 'code-block-header-language';
+          languageElement.textContent = language;
+          headerMetaElement.appendChild(languageElement);
+        }
+
+        header.appendChild(titleElement);
+        header.appendChild(headerMetaElement);
+
+        parent.insertBefore(shell, preElement);
+        shell.appendChild(header);
+        shell.appendChild(preElement);
+      });
+    };
+
+    const initializeCodeCopyButtons = () => {
+      document.querySelectorAll('.article-content pre').forEach((preElement) => {
+        if (preElement.dataset.copyButtonReady === 'true') return;
+        preElement.dataset.copyButtonReady = 'true';
+
+        const copyButton = document.createElement('button');
+        copyButton.type = 'button';
+        copyButton.className = 'code-copy-button';
+        copyButton.setAttribute('aria-label', 'Copy code');
+        copyButton.innerHTML =
+          '<span class="icon-copy">' +
+          copyIconSvg +
+          '</span><span class="icon-check">' +
+          checkIconSvg +
+          '</span>';
+
+        let resetTimer;
+
+        copyButton.addEventListener('click', async () => {
+          const codeElement = preElement.querySelector('code');
+          const rawText = codeElement?.innerText ?? codeElement?.textContent ?? preElement.textContent ?? '';
+          const textToCopy = rawText.replace(/\n$/, '');
+
+          try {
+            await copyToClipboard(textToCopy);
+            copyButton.classList.add('is-copied');
+            copyButton.setAttribute('aria-label', 'Copied');
+
+            if (resetTimer) window.clearTimeout(resetTimer);
+            resetTimer = window.setTimeout(() => {
+              copyButton.classList.remove('is-copied');
+              copyButton.setAttribute('aria-label', 'Copy code');
+            }, 1600);
+          } catch (error) {
+            copyButton.setAttribute('aria-label', 'Copy failed');
+          }
+        });
+
+        const headerMetaElement = preElement
+          .closest('.code-block-shell')
+          ?.querySelector('.code-block-header-meta');
+
+        if (headerMetaElement) {
+          headerMetaElement.appendChild(copyButton);
+        } else {
+          preElement.appendChild(copyButton);
+        }
+      });
+    };
+
+    const initializeImageAltToggles = () => {
+      document.querySelectorAll('.article-content .article-image-block').forEach((figureElement) => {
+        if (figureElement.dataset.altToggleReady === 'true') return;
+        figureElement.dataset.altToggleReady = 'true';
+
+        const imageElement = figureElement.querySelector('img');
+        if (!imageElement) return;
+
+        const altText = (imageElement.getAttribute('alt') ?? '').trim();
+        if (!altText) return;
+
+        const captionElement = figureElement.querySelector('.image-caption');
+        const existingFlipShell = figureElement.querySelector('.article-image-flip-shell');
+
+        if (!existingFlipShell) {
+          const flipShell = document.createElement('div');
+          flipShell.className = 'article-image-flip-shell';
+
+          const flipInner = document.createElement('div');
+          flipInner.className = 'article-image-flip-inner';
+
+          const frontFace = document.createElement('div');
+          frontFace.className = 'article-image-face article-image-face-front';
+
+          const backFace = document.createElement('div');
+          backFace.className = 'article-image-face article-image-face-back';
+
+          const altPanel = document.createElement('div');
+          altPanel.className = 'article-image-alt-panel';
+
+          const altLabel = document.createElement('p');
+          altLabel.className = 'article-image-alt-label';
+          altLabel.textContent = 'Alt text';
+
+          const altCopy = document.createElement('p');
+          altCopy.className = 'article-image-alt-copy';
+          altCopy.textContent = altText;
+
+          altPanel.appendChild(altLabel);
+          altPanel.appendChild(altCopy);
+
+          frontFace.appendChild(imageElement);
+          backFace.appendChild(altPanel);
+          flipInner.appendChild(frontFace);
+          flipInner.appendChild(backFace);
+          flipShell.appendChild(flipInner);
+
+          if (captionElement) {
+            figureElement.insertBefore(flipShell, captionElement);
+          } else {
+            figureElement.appendChild(flipShell);
+          }
+        }
+
+        const toggleButton = document.createElement('button');
+        toggleButton.type = 'button';
+        toggleButton.className = 'image-alt-toggle';
+        toggleButton.textContent = 'Alt';
+        toggleButton.setAttribute('aria-label', 'Show image alt text');
+        toggleButton.setAttribute('aria-expanded', 'false');
+
+        toggleButton.addEventListener('click', () => {
+          const nextFlipped = !figureElement.classList.contains('is-flipped');
+          figureElement.classList.toggle('is-flipped', nextFlipped);
+          toggleButton.setAttribute('aria-expanded', String(nextFlipped));
+          toggleButton.textContent = nextFlipped ? 'Image' : 'Alt';
+          toggleButton.setAttribute(
+            'aria-label',
+            nextFlipped ? 'Show image' : 'Show image alt text'
+          );
+        });
+
+        figureElement.appendChild(toggleButton);
+      });
+    };
+
+    const initializeInteractiveContent = () => {
+      initializeCodeBlockHeaders();
+      initializeCodeCopyButtons();
+      initializeImageAltToggles();
+    };
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initializeInteractiveContent, { once: true });
+    } else {
+      initializeInteractiveContent();
+    }
+  </script>
 </Layout>
