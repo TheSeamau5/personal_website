@@ -9,7 +9,7 @@ const posts = (await getCollection('posts')).sort(
 
 <Layout title="Home | Personal Website">
   <main class="mx-auto w-full max-w-384 px-4 py-4 md:px-8 md:py-6">
-    <section class="px-0 py-3 md:border md:border-black md:px-10 md:py-11">
+    <section class="px-0 py-3 md:px-10 md:py-11">
       <h1 class="display-title text-5xl font-semibold leading-none tracking-tight md:text-7xl">
         Hassan Hayat
       </h1>
@@ -20,7 +20,7 @@ const posts = (await getCollection('posts')).sort(
       </p>
     </section>
 
-    <section class="mt-8 px-0 py-2 md:mt-12 md:border md:border-black md:px-10 md:py-10" id="posts">
+    <section class="mt-8 px-0 py-2 md:mt-12 md:px-10 md:py-10" id="posts">
       <h2 class="text-sm font-semibold uppercase tracking-[0.2em] text-zinc-600">Posts</h2>
       <ul class="mt-7 flex flex-col gap-5">
         {posts.map((post) => (

@@ -117,7 +117,7 @@ function FlipPanel({ showTable, front, back }: FlipPanelProps) {
 
   return (
     <div className="relative w-full" style={{ perspective: "1400px" }}>
-      <div className="relative grid w-full [grid-template-columns:minmax(0,1fr)]">
+      <div className="relative grid w-full grid-cols-[minmax(0,1fr)]">
         <div
           className={cn(
             "col-start-1 row-start-1 min-h-0 w-full overflow-hidden border border-black bg-white py-3 transition-[transform,opacity] duration-500 will-change-transform sm:py-4",

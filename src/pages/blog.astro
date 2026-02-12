@@ -7,10 +7,10 @@ const posts = (await getCollection('posts')).sort(
 );
 ---
 
-<Layout title="Blog | Personal Website">
+<Layout title="Posts | Personal Website">
   <main class="mx-auto w-full max-w-384 px-4 py-4 md:px-8 md:py-6">
-    <section class="px-0 py-2 md:border md:border-black md:px-10 md:py-10">
-      <h1 class="display-title text-5xl font-semibold leading-none tracking-tight md:text-7xl">Blog</h1>
+    <section class="px-0 py-2 md:px-10 md:py-10">
+      <h1 class="display-title text-5xl font-semibold leading-none tracking-tight md:text-7xl">Posts</h1>
 
       <ul class="mt-8 flex flex-col gap-6">
         {posts.map((post) => (

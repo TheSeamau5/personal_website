@@ -32,12 +32,12 @@ const { title = 'Personal Website' } = Astro.props;
     <meta name="generator" content={Astro.generator} />
     <title>{title}</title>
   </head>
-  <body class="bg-white text-zinc-950 antialiased">
+  <body class="bg-white text-zinc-950 antialiased md:mx-1! md:border border-black min-h-dvh! h-fit!">
     <header class="border-b border-black">
       <div class="mx-auto flex w-full max-w-384 items-center justify-between px-4 py-3 md:px-8">
         <nav class="flex items-center gap-5 text-sm uppercase tracking-[0.12em] md:gap-8">
           <a href="/" class="transition hover:opacity-60">Home</a>
-          <a href="/blog/" class="transition hover:opacity-60">Blog</a>
+          <a href="/blog/" class="transition hover:opacity-60">Posts</a>
           <a
             href="https://twitter.com"
             class="hidden transition hover:opacity-60 md:inline"
